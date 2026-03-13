@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ResumeForge Premium — Internship Platform</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #050510;
+      --bg2: #0a0a1f;
+      --bg3: #0f0f2a;
+      --surface: rgba(255,255,255,0.04);
+      --surface2: rgba(255,255,255,0.08);
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(99,102,241,0.3);
+      --indigo: #6366f1;
+      --violet: #8b5cf6;
+      --amber: #f59e0b;
+      --emerald: #10b981;
+      --rose: #f43f5e;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --muted2: #94a3b8;
+      --glow: 0 0 40px rgba(99,102,241,0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99,102,241,0.15) 0%, transparent 60%),
+                  radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139,92,246,0.1) 0%, transparent 50%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg2); }
+    ::-webkit-scrollbar-thumb { background: var(--indigo); border-radius: 3px; }
+
+    #root { position: relative; z-index: 1; }
+
+    /* Toast */
+    .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+    .toast { padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 500; animation: slideIn 0.3s ease; display: flex; align-items: center; gap: 10px; max-width: 320px; backdrop-filter: blur(20px); border: 1px solid; }
+    .toast-success { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.4); color: #6ee7b7; }
+    .toast-error { background: rgba(244,63,94,0.15); border-color: rgba(244,63,94,0.4); color: #fda4af; }
+    .toast-info { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.4); color: #a5b4fc; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* Layout */
+    .app { min-height: 100vh; }
+    
+    /* Navbar */
+    .navbar {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 40px;
+      background: rgba(5,5,16,0.8); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .navbar-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--indigo), var(--violet)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .logo-text { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; background: linear-gradient(135deg, #a5b4fc, #c4b5fd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .navbar-actions { display: flex; align-items: center; gap: 12px; }
+    .btn { padding: 9px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+    .btn-ghost { background: transparent; color: var(--muted2); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--surface); color: var(--text); }
+    .btn-primary { background: linear-gradient(135deg, var(--indigo), var(--violet)); color: white; }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(99,102,241,0.35); }
+    .btn-amber { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+    .btn-amber:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(245,158,11,0.35); }
+    .btn-emerald { background: linear-gradient(135deg, var(--emerald), #059669); color: white; }
+    .btn-emerald:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(16,185,129,0.35); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+    .btn-lg { padding: 13px 28px; font-size: 15px; border-radius: 12px; }
+
+    /* Hero */
+    .hero { text-align: center; padding: 90px 20px 60px; max-width: 900px; margin: 0 auto; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.3); border-radius: 100px; font-size: 12px; color: #a5b4fc; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px; }
+    .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(36px, 6vw, 68px); font-weight: 900; line-height: 1.1; margin-bottom: 20px; }
+    .gradient-text { background: linear-gradient(135deg, #a5b4fc 0%, #c4b5fd 50%, #fbbf24 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-desc { font-size: 17px; color: var(--muted2); max-width: 600px; margin: 0 auto 40px; line-height: 1.7; }
+    .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .price-badge { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: 100px; font-size: 14px; font-weight: 700; color: #fbbf24; }
+
+    /* Feature cards */
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; max-width: 1000px; margin: 0 auto 80px; padding: 0 20px; }
+    .feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; transition: all 0.3s; }
+    .feature-card:hover { border-color: var(--border2); background: var(--surface2); transform: translateY(-3px); box-shadow: var(--glow); }
+    .feature-icon { font-size: 28px; margin-bottom: 12px; }
+    .feature-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+    .feature-desc { font-size: 13px; color: var(--muted2); line-height: 1.5; }
+
+    /* Resume Section */
+    .resume-section { max-width: 1400px; margin: 0 auto; padding: 0 20px 80px; }
+    
+    /* Stepper */
+    .stepper { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 40px; flex-wrap: wrap; }
+    .step { display: flex; align-items: center; gap: 8px; }
+    .step-circle { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; border: 2px solid var(--border); color: var(--muted); transition: all 0.3s; }
+    .step-circle.active { border-color: var(--indigo); background: rgba(99,102,241,0.2); color: var(--text); }
+    .step-circle.done { border-color: var(--emerald); background: rgba(16,185,129,0.2); color: var(--emerald); }
+    .step-label { font-size: 13px; font-weight: 500; color: var(--muted); white-space: nowrap; }
+    .step-label.active { color: var(--text); }
+    .step-line { width: 50px; height: 2px; background: var(--border); margin: 0 8px; transition: all 0.3s; }
+    .step-line.done { background: var(--emerald); }
+
+    /* Main grid */
+    .main-grid { display: grid; grid-template-columns: 1fr 420px; gap: 24px; align-items: start; }
+    @media (max-width: 1024px) { .main-grid { grid-template-columns: 1fr; } }
+
+    /* Card */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px; }
+    .card-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; }
+    .card-title span { font-size: 24px; }
+
+    /* Form */
+    .form-section { margin-bottom: 28px; }
+    .section-header { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--indigo); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .section-header::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, rgba(99,102,241,0.3), transparent); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-row.cols-1 { grid-template-columns: 1fr; }
+    .form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    @media (max-width: 640px) { .form-row, .form-row.cols-3 { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 12px; font-weight: 600; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-input, .form-textarea, .form-select {
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 14px; color: var(--text);
+      font-size: 14px; font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s; outline: none;
+    }
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      border-color: var(--indigo); background: rgba(99,102,241,0.05);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+    }
+    .form-input::placeholder, .form-textarea::placeholder { color: var(--muted); }
+    .form-textarea { resize: vertical; min-height: 90px; }
+    .form-select { cursor: pointer; }
+    .form-select option { background: #1a1a2e; color: var(--text); }
+
+    /* Dynamic arrays */
+    .array-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; position: relative; }
+    .array-item-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .array-item-title { font-size: 13px; font-weight: 700; color: var(--indigo); }
+    .btn-remove { background: rgba(244,63,94,0.12); border: 1px solid rgba(244,63,94,0.25); color: #fb7185; padding: 5px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+    .btn-remove:hover { background: rgba(244,63,94,0.2); }
+    .btn-add { background: rgba(99,102,241,0.1); border: 1px dashed rgba(99,102,241,0.4); color: #a5b4fc; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.2s; margin-top: 4px; }
+    .btn-add:hover { background: rgba(99,102,241,0.18); border-style: solid; }
+
+    /* Skills tags */
+    .skills-input-area { display: flex; gap: 8px; margin-bottom: 10px; }
+    .skills-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .skill-tag { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.3); border-radius: 100px; font-size: 12px; color: #a5b4fc; font-weight: 500; }
+    .skill-tag button { background: none; border: none; color: #6366f1; cursor: pointer; font-size: 14px; line-height: 1; padding: 0; display: flex; }
+
+    /* Photo upload */
+    .photo-upload { border: 2px dashed var(--border2); border-radius: 14px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s; }
+    .photo-upload:hover { border-color: var(--indigo); background: rgba(99,102,241,0.05); }
+    .photo-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--indigo); margin: 0 auto 12px; display: block; }
+    .photo-upload-text { font-size: 13px; color: var(--muted2); }
+    .photo-upload-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* Sidebar panels */
+    .sidebar-panel { position: sticky; top: 80px; display: flex; flex-direction: column; gap: 16px; }
+    
+    /* Live Preview */
+    .preview-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
+    .preview-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .preview-title { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    .live-dot { width: 8px; height: 8px; background: var(--emerald); border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .preview-frame { height: 500px; overflow: auto; background: white; }
+    .preview-frame iframe { width: 100%; height: 100%; border: none; transform-origin: top left; }
+
+    /* OTP Panel */
+    .otp-panel { background: var(--surface); border: 1px solid var(--border2); border-radius: 20px; padding: 28px; text-align: center; }
+    .otp-icon { font-size: 48px; margin-bottom: 16px; }
+    .otp-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .otp-subtitle { font-size: 14px; color: var(--muted2); margin-bottom: 24px; line-height: 1.5; }
+    .otp-input-row { display: flex; gap: 8px; justify-content: center; margin: 20px 0; }
+    .otp-digit { width: 48px; height: 56px; border: 2px solid var(--border); border-radius: 12px; background: var(--surface2); color: var(--text); font-size: 22px; font-weight: 700; text-align: center; font-family: 'JetBrains Mono', monospace; transition: all 0.2s; outline: none; }
+    .otp-digit:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
+    .otp-timer { font-size: 13px; color: var(--amber); font-weight: 600; margin: 8px 0; }
+    .otp-resend { font-size: 13px; color: var(--muted); }
+    .otp-resend button { background: none; border: none; color: var(--indigo); cursor: pointer; font-weight: 600; font-size: 13px; }
+    .otp-resend button:hover { color: #a5b4fc; }
+
+    /* Payment Panel */
+    .payment-panel { background: var(--surface); border: 1px solid rgba(245,158,11,0.3); border-radius: 20px; padding: 28px; }
+    .payment-amount { font-family: 'Playfair Display', serif; font-size: 48px; font-weight: 900; color: var(--amber); text-align: center; margin: 16px 0 8px; }
+    .payment-features { display: flex; flex-direction: column; gap: 8px; margin: 20px 0; }
+    .payment-feature { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted2); }
+    .payment-feature .check { color: var(--emerald); font-size: 16px; }
+    .razorpay-note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+
+    /* Success panel */
+    .success-panel { background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(99,102,241,0.08)); border: 1px solid rgba(16,185,129,0.3); border-radius: 20px; padding: 40px 28px; text-align: center; }
+    .success-icon { font-size: 64px; margin-bottom: 16px; animation: bounceIn 0.5s ease; }
+    @keyframes bounceIn { 0% { transform: scale(0); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
+    .success-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--emerald); margin-bottom: 8px; }
+    .success-subtitle { color: var(--muted2); font-size: 14px; margin-bottom: 24px; }
+    .tx-badge { background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); border-radius: 8px; padding: 10px 16px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #a5b4fc; word-break: break-all; margin-bottom: 20px; }
+
+    /* Auth Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal { background: #0f0f2a; border: 1px solid rgba(99,102,241,0.3); border-radius: 24px; padding: 36px; width: 100%; max-width: 420px; position: relative; animation: modalIn 0.3s ease; }
+    @keyframes modalIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-close { position: absolute; top: 16px; right: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; width: 32px; height: 32px; cursor: pointer; color: var(--muted2); font-size: 18px; display: flex; align-items: center; justify-content: center; }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+    .modal-subtitle { color: var(--muted2); font-size: 14px; margin-bottom: 28px; }
+    .auth-switch { text-align: center; margin-top: 20px; font-size: 14px; color: var(--muted); }
+    .auth-switch button { background: none; border: none; color: var(--indigo); cursor: pointer; font-weight: 600; font-size: 14px; }
+
+    /* Progress bar */
+    .progress-bar-outer { height: 4px; background: var(--surface2); border-radius: 4px; margin: 8px 0 20px; overflow: hidden; }
+    .progress-bar-inner { height: 100%; background: linear-gradient(90deg, var(--indigo), var(--violet)); border-radius: 4px; transition: width 0.5s ease; }
+
+    /* Loading spinner */
+    .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.2); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Chips */
+    .chip { display: inline-flex; align-items: center; padding: 4px 10px; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); border-radius: 100px; font-size: 11px; color: #a5b4fc; font-weight: 600; }
+
+    /* Divider */
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--surface); border-radius: 12px; padding: 4px; }
+    .tab { flex: 1; padding: 9px; text-align: center; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--muted); transition: all 0.2s; border: none; background: transparent; }
+    .tab.active { background: rgba(99,102,241,0.2); color: var(--text); }
+
+    /* Floating action */
+    .floating-action { position: fixed; bottom: 30px; right: 30px; z-index: 50; }
+    .fab { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--indigo), var(--violet)); border: none; color: white; font-size: 24px; cursor: pointer; box-shadow: 0 8px 32px rgba(99,102,241,0.4); transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+    .fab:hover { transform: scale(1.1); }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .navbar { padding: 12px 16px; }
+      .hero { padding: 60px 16px 40px; }
+      .features { grid-template-columns: 1fr 1fr; padding: 0 16px; }
+      .resume-section { padding: 0 16px 60px; }
+      .stepper { gap: 4px; }
+      .step-line { width: 24px; }
+      .step-label { font-size: 11px; }
+    }
+    @media (max-width: 480px) {
+      .features { grid-template-columns: 1fr; }
+      .step-label { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ─── Toast System ───────────────────────────────────────────────────────────
+let addToastGlobal = null;
+function ToastContainer() {
+  const [toasts, setToasts] = useState([]);
+  addToastGlobal = useCallback((msg, type = 'info') => {
+    const id = Date.now();
+    setToasts(t => [...t, { id, msg, type }]);
+    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3800);
+  }, []);
+  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  return (
+    <div className="toast-container">
+      {toasts.map(t => (
+        <div key={t.id} className={`toast toast-${t.type}`}>
+          {icons[t.type]} {t.msg}
+        </div>
+      ))}
+    </div>
+  );
+}
+const toast = { success: m => addToastGlobal?.(m,'success'), error: m => addToastGlobal?.(m,'error'), info: m => addToastGlobal?.(m,'info') };
+
+// ─── Mock API (replace with real API in production) ──────────────────────────
+const API = {
+  // In production, replace these with actual fetch calls to your backend
+  register: async (data) => {
+    await new Promise(r => setTimeout(r, 1000));
+    if (data.email === 'test@test.com') throw new Error('Email already registered.');
+    return { token: 'mock_jwt_token_' + Date.now(), user: { id: '1', fullName: data.fullName, email: data.email, isPremium: false } };
+  },
+  login: async (data) => {
+    await new Promise(r => setTimeout(r, 800));
+    return { token: 'mock_jwt_token_' + Date.now(), user: { id: '1', fullName: 'Demo Student', email: data.email, isPremium: false } };
+  },
+  sendOTP: async () => {
+    await new Promise(r => setTimeout(r, 1200));
+    console.log('📧 OTP: 123456 (mock)');
+    return { message: 'OTP sent successfully' };
+  },
+  verifyOTP: async (otp) => {
+    await new Promise(r => setTimeout(r, 800));
+    if (otp !== '123456') throw new Error('Invalid OTP. Use 123456 for demo.');
+    return { otpToken: 'verified_' + Date.now() };
+  },
+  createOrder: async () => {
+    await new Promise(r => setTimeout(r, 1000));
+    return { orderId: 'order_mock_' + Date.now(), amount: 5000, keyId: 'rzp_test_demo', transactionId: 'tx_' + Date.now() };
+  },
+  verifyPayment: async (data) => {
+    await new Promise(r => setTimeout(r, 1000));
+    return { transactionId: data.razorpay_order_id, paymentId: 'pay_mock_' + Date.now() };
+  },
+  generateResume: async (data) => {
+    await new Promise(r => setTimeout(r, 2000));
+    return { resumeId: 'resume_' + Date.now(), pdfUrl: '#' };
+  }
+};
+
+// ─── Auth Modal ──────────────────────────────────────────────────────────────
+function AuthModal({ onClose, onSuccess }) {
+  const [mode, setMode] = useState('login');
+  const [form, setForm] = useState({ fullName: '', email: '', password: '' });
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!form.email || !form.password) return toast.error('Please fill all fields');
+    if (mode === 'register' && !form.fullName) return toast.error('Name is required');
+    setLoading(true);
+    try {
+      const res = mode === 'login' ? await API.login(form) : await API.register(form);
+      localStorage.setItem('token', res.token);
+      localStorage.setItem('user', JSON.stringify(res.user));
+      onSuccess(res.user);
+      toast.success(`Welcome${mode === 'register' ? ', ' + form.fullName : ' back'}!`);
+    } catch (e) {
+      toast.error(e.message || 'Authentication failed');
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal">
+        <button className="modal-close" onClick={onClose}>×</button>
+        <div className="modal-title">{mode === 'login' ? 'Welcome Back' : 'Create Account'}</div>
+        <div className="modal-subtitle">{mode === 'login' ? 'Sign in to access premium features' : 'Join the internship platform'}</div>
+        
+        <div className="tabs">
+          <button className={`tab ${mode==='login'?'active':''}`} onClick={() => setMode('login')}>Sign In</button>
+          <button className={`tab ${mode==='register'?'active':''}`} onClick={() => setMode('register')}>Register</button>
+        </div>
+
+        {mode === 'register' && (
+          <div className="form-group" style={{marginBottom:12}}>
+            <label className="form-label">Full Name</label>
+            <input className="form-input" placeholder="Arjun Sharma" value={form.fullName}
+              onChange={e => setForm({...form, fullName: e.target.value})} />
+          </div>
+        )}
+        <div className="form-group" style={{marginBottom:12}}>
+          <label className="form-label">Email Address</label>
+          <input className="form-input" type="email" placeholder="student@college.edu" value={form.email}
+            onChange={e => setForm({...form, email: e.target.value})} />
+        </div>
+        <div className="form-group" style={{marginBottom:20}}>
+          <label className="form-label">Password</label>
+          <input className="form-input" type="password" placeholder="••••••••" value={form.password}
+            onChange={e => setForm({...form, password: e.target.value})}
+            onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
+        </div>
+        <button className="btn btn-primary btn-lg" style={{width:'100%'}} onClick={handleSubmit} disabled={loading}>
+          {loading ? <><span className="spinner"/>&nbsp; {mode==='login'?'Signing in...':'Creating account...'}</> : (mode==='login'?'Sign In':'Create Account')}
+        </button>
+        <p className="auth-switch">
+          {mode === 'login' ? "Don't have an account?" : "Already have an account?"}{' '}
+          <button onClick={() => setMode(mode==='login'?'register':'login')}>
+            {mode === 'login' ? 'Register' : 'Sign In'}
+          </button>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Skills Input ─────────────────────────────────────────────────────────────
+function SkillsInput({ value = [], onChange }) {
+  const [input, setInput] = useState('');
+  const add = () => {
+    const skill = input.trim();
+    if (!skill || value.includes(skill)) return;
+    onChange([...value, skill]);
+    setInput('');
+  };
+  return (
+    <div>
+      <div className="skills-input-area">
+        <input className="form-input" style={{flex:1}} placeholder="Add skill (e.g. React.js)" value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), add())} />
+        <button className="btn btn-ghost" onClick={add} style={{minWidth:60}}>+ Add</button>
+      </div>
+      <div className="skills-tags">
+        {value.map(s => (
+          <span key={s} className="skill-tag">
+            {s}
+            <button onClick={() => onChange(value.filter(x => x !== s))}>×</button>
+          </span>
+        ))}
+        {value.length === 0 && <span style={{fontSize:12,color:'var(--muted)'}}>No skills added yet</span>}
+      </div>
+    </div>
+  );
+}
+
+// ─── OTP Step ─────────────────────────────────────────────────────────────────
+function OTPStep({ user, onVerified }) {
+  const [digits, setDigits] = useState(['','','','','','']);
+  const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const refs = useRef([]);
+
+  const sendOTP = async () => {
+    setLoading(true);
+    try {
+      await API.sendOTP();
+      setSent(true);
+      setTimer(300);
+      setDigits(['','','','','','']);
+      toast.success('OTP sent! Check your email. (Demo: 123456)');
+    } catch(e) {
+      toast.error(e.message || 'Failed to send OTP');
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (timer <= 0) return;
+    const interval = setInterval(() => setTimer(t => t - 1), 1000);
+    return () => clearInterval(interval);
+  }, [timer]);
+
+  const handleDigit = (i, val) => {
+    if (!/^\d?$/.test(val)) return;
+    const newDigits = [...digits];
+    newDigits[i] = val;
+    setDigits(newDigits);
+    if (val && i < 5) refs.current[i+1]?.focus();
+  };
+
+  const handleKeyDown = (i, e) => {
+    if (e.key === 'Backspace' && !digits[i] && i > 0) refs.current[i-1]?.focus();
+  };
+
+  const verify = async () => {
+    const otp = digits.join('');
+    if (otp.length < 6) return toast.error('Enter all 6 digits');
+    setVerifying(true);
+    try {
+      await API.verifyOTP(otp);
+      toast.success('OTP verified successfully!');
+      onVerified();
+    } catch(e) {
+      toast.error(e.message || 'Invalid OTP');
+    }
+    setVerifying(false);
+  };
+
+  const mins = String(Math.floor(timer/60)).padStart(2,'0');
+  const secs = String(timer%60).padStart(2,'0');
+
+  return (
+    <div className="otp-panel">
+      <div className="otp-icon">🔐</div>
+      <div className="otp-title">Email Verification</div>
+      <div className="otp-subtitle">
+        We'll send a 6-digit OTP to<br/>
+        <strong style={{color:'var(--indigo)'}}>{user?.email}</strong><br/>
+        to verify your identity before payment.
+      </div>
+
+      {!sent ? (
+        <button className="btn btn-primary btn-lg" style={{width:'100%'}} onClick={sendOTP} disabled={loading}>
+          {loading ? <><span className="spinner"/>&nbsp; Sending OTP...</> : '📧 Send OTP to Email'}
+        </button>
+      ) : (
+        <>
+          <div style={{fontSize:13,color:'var(--muted2)',marginBottom:8}}>Enter the 6-digit code</div>
+          <div className="otp-input-row">
+            {digits.map((d, i) => (
+              <input key={i} ref={el => refs.current[i] = el} className="otp-digit"
+                maxLength={1} value={d} onChange={e => handleDigit(i, e.target.value)}
+                onKeyDown={e => handleKeyDown(i, e)} />
+            ))}
+          </div>
+          {timer > 0 ? (
+            <div className="otp-timer">⏱ Expires in {mins}:{secs}</div>
+          ) : (
+            <div className="otp-timer" style={{color:'var(--rose)'}}>⚠️ OTP expired</div>
+          )}
+          <div className="otp-resend">
+            Didn't receive?{' '}
+            <button onClick={sendOTP} disabled={timer > 270}>
+              {timer > 270 ? 'Resend in ' + (timer-270) + 's' : 'Resend OTP'}
+            </button>
+          </div>
+          <button className="btn btn-primary btn-lg" style={{width:'100%',marginTop:16}} onClick={verify} disabled={verifying || digits.join('').length < 6}>
+            {verifying ? <><span className="spinner"/>&nbsp; Verifying...</> : 'Verify OTP →'}
+          </button>
+        </>
+      )}
+      <div style={{fontSize:12,color:'var(--muted)',marginTop:16,textAlign:'center'}}>
+        OTP expires in 5 minutes. Max 5 attempts allowed.
+      </div>
+    </div>
+  );
+}
+
+// ─── Payment Step ─────────────────────────────────────────────────────────────
+function PaymentStep({ user, onPaid }) {
+  const [loading, setLoading] = useState(false);
+  const [order, setOrder] = useState(null);
+
+  const createOrder = async () => {
+    setLoading(true);
+    try {
+      const res = await API.createOrder();
+      setOrder(res);
+    } catch(e) {
+      toast.error(e.message || 'Failed to create order');
+    }
+    setLoading(false);
+  };
+
+  const handleRazorpay = async () => {
+    if (!order) return;
+    // In production, load Razorpay SDK and open checkout
+    // const options = {
+    //   key: order.keyId, amount: order.amount, currency: 'INR',
+    //   order_id: order.orderId, name: 'ResumeForge Premium',
+    //   description: 'Premium Resume Generation ₹50',
+    //   handler: async (response) => { await API.verifyPayment(response); onPaid(response); }
+    // };
+    // new window.Razorpay(options).open();
+    
+    // Mock payment flow for demo
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 1500));
+    const mockRes = {
+      razorpay_order_id: order.orderId,
+      razorpay_payment_id: 'pay_mock_' + Date.now(),
+      razorpay_signature: 'sig_mock'
+    };
+    try {
+      await API.verifyPayment(mockRes);
+      toast.success('Payment successful! ₹50 paid via Razorpay');
+      onPaid(mockRes);
+    } catch(e) {
+      toast.error('Payment verification failed');
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="payment-panel">
+      <div style={{textAlign:'center'}}>
+        <div className="chip" style={{marginBottom:8}}>⭐ Premium Feature</div>
+        <div style={{fontFamily:'Playfair Display, serif',fontSize:18,fontWeight:700,marginBottom:4}}>
+          Generate Premium Resume
+        </div>
+        <div className="payment-amount">₹50</div>
+        <div style={{fontSize:12,color:'var(--muted)',marginBottom:20}}>One-time payment per generation</div>
+      </div>
+
+      <div className="payment-features">
+        {['ATS-Optimized PDF Resume','Professional Template Design','Downloadable PDF','Auto-saved to Profile','Email Confirmation'].map(f => (
+          <div key={f} className="payment-feature">
+            <span className="check">✓</span> {f}
+          </div>
+        ))}
+      </div>
+
+      <div className="divider" />
+
+      {!order ? (
+        <button className="btn btn-amber btn-lg" style={{width:'100%'}} onClick={createOrder} disabled={loading}>
+          {loading ? <><span className="spinner"/>&nbsp; Preparing...</> : '🛒 Proceed to Pay ₹50'}
+        </button>
+      ) : (
+        <button className="btn btn-amber btn-lg" style={{width:'100%'}} onClick={handleRazorpay} disabled={loading}>
+          {loading ? <><span className="spinner"/>&nbsp; Processing Payment...</> : '💳 Pay ₹50 via Razorpay'}
+        </button>
+      )}
+
+      <div className="razorpay-note">
+        🔒 Secured by Razorpay &nbsp;|&nbsp; UPI, Cards, Net Banking
+      </div>
+    </div>
+  );
+}
+
+// ─── Live Resume Preview ──────────────────────────────────────────────────────
+function LivePreview({ formData }) {
+  const generatePreviewHTML = () => {
+    const { fullName, email, phone, address, careerObjective, qualifications = [],
+            technicalSkills = [], workExperience = [], projects = [], certifications = [],
+            personalInfo = {}, profilePhotoPreview } = formData;
+
+    if (!fullName && !email) return '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#64748b;font-family:sans-serif;font-size:13px;">Start filling the form to see live preview</div>';
+
+    return `<div style="font-family:Georgia,serif;font-size:10px;color:#1a1a2e;line-height:1.4;background:white;min-height:100vh;">
+      <div style="background:linear-gradient(135deg,#1a1a2e,#0f3460);color:white;padding:20px 24px;display:flex;align-items:center;gap:16px;">
+        ${profilePhotoPreview ? `<img src="${profilePhotoPreview}" style="width:60px;height:60px;border-radius:50%;border:2px solid rgba(99,102,241,0.6);object-fit:cover;" />` : ''}
+        <div>
+          <div style="font-size:20px;font-weight:700;color:#e2e8f0;">${fullName || 'Your Name'}</div>
+          <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:10px;">
+            ${email ? `<span style="font-size:9px;color:#94a3b8;">📧 ${email}</span>` : ''}
+            ${phone ? `<span style="font-size:9px;color:#94a3b8;">📱 ${phone}</span>` : ''}
+            ${address ? `<span style="font-size:9px;color:#94a3b8;">📍 ${address}</span>` : ''}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;">
+        <div style="width:140px;min-width:140px;background:#f8fafc;border-right:1px solid #e2e8f0;padding:14px 12px;">
+          ${technicalSkills.length ? `<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6366f1;border-bottom:1px solid #6366f1;padding-bottom:3px;margin-bottom:8px;">Skills</div>
+          <div style="display:flex;flex-wrap:wrap;gap:3px;">${technicalSkills.map(s=>`<span style="background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.3);color:#4f46e5;padding:2px 6px;border-radius:4px;font-size:8px;">${s}</span>`).join('')}</div>` : ''}
+          ${certifications.length ? `<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6366f1;border-bottom:1px solid #6366f1;padding-bottom:3px;margin:10px 0 8px;">Certifications</div>
+          ${certifications.map(c=>`<div style="font-size:8.5px;color:#374151;margin-bottom:4px;"><strong>${c.name}</strong>${c.issuer?`<br/><span style="color:#64748b">${c.issuer}</span>`:''}</div>`).join('')}` : ''}
+        </div>
+        <div style="flex:1;padding:14px 18px;">
+          ${careerObjective ? `<div style="margin-bottom:14px;"><div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#6366f1;border-bottom:1px solid #6366f1;padding-bottom:3px;margin-bottom:7px;">Objective</div><p style="font-size:9px;color:#374151;line-height:1.5;">${careerObjective}</p></div>` : ''}
+          ${qualifications.length ? `<div style="margin-bottom:14px;"><div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#6366f1;border-bottom:1px solid #6366f1;padding-bottom:3px;margin-bottom:7px;">Education</div>${qualifications.map(q=>`<div style="display:flex;justify-content:space-between;margin-bottom:6px;"><div><strong style="font-size:9px;">${q.degree}</strong><div style="font-size:8.5px;color:#475569;">${q.institution}</div></div><div style="text-align:right;"><span style="font-size:8.5px;color:#6366f1;font-weight:600;">${q.year}</span>${q.percentage?`<div style="font-size:8px;color:#10b981;">${q.percentage}%</div>`:''}</div></div>`).join('')}</div>` : ''}
+          ${workExperience.length ? `<div style="margin-bottom:14px;"><div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#6366f1;border-bottom:1px solid #6366f1;padding-bottom:3px;margin-bottom:7px;">Experience</div>${workExperience.map(e=>`<div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;"><strong style="font-size:9px;">${e.role}</strong><span style="font-size:8px;color:#6366f1;background:rgba(99,102,241,0.1);padding:1px 5px;border-radius:3px;">${e.duration}</span></div><div style="font-size:8.5px;color:#475569;font-style:italic;">@ ${e.company}</div>${e.description?`<p style="font-size:8.5px;color:#64748b;margin-top:3px;">${e.description}</p>`:''}</div>`).join('')}</div>` : ''}
+          ${projects.length ? `<div style="margin-bottom:14px;"><div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#6366f1;border-bottom:1px solid #6366f1;padding-bottom:3px;margin-bottom:7px;">Projects</div>${projects.map(p=>`<div style="margin-bottom:7px;"><strong style="font-size:9px;">${p.name}</strong>${p.technologies?`<div style="font-size:8px;color:#6366f1;font-style:italic;">${p.technologies}</div>`:''}<p style="font-size:8.5px;color:#64748b;margin-top:2px;">${p.description||''}</p></div>`).join('')}</div>` : ''}
+        </div>
+      </div>
+    </div>`;
+  };
+
+  return (
+    <div className="preview-card">
+      <div className="preview-header">
+        <div className="preview-title">
+          <div className="live-dot"></div>
+          Live Preview
+        </div>
+        <span className="chip">ATS-Friendly</span>
+      </div>
+      <div className="preview-frame">
+        <iframe srcDoc={generatePreviewHTML()} title="Resume Preview" />
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Resume Form ─────────────────────────────────────────────────────────
+function ResumeForm({ user, onGenerated }) {
+  const [step, setStep] = useState(1); // 1=fill, 2=otp, 3=pay, 4=done
+  const [generating, setGenerating] = useState(false);
+  const [result, setResult] = useState(null);
+
+  const [form, setForm] = useState({
+    fullName: user?.fullName || '',
+    email: user?.email || '',
+    phone: '',
+    address: '',
+    careerObjective: '',
+    qualifications: [{ degree: '', institution: '', board: '', year: '', percentage: '' }],
+    technicalSkills: [],
+    workExperience: [],
+    projects: [],
+    certifications: [],
+    personalInfo: { dob: '', gender: '', nationality: 'Indian', languages: [], hobbies: [] },
+    profilePhoto: null,
+    profilePhotoPreview: null,
+  });
+
+  const set = (key, val) => setForm(f => ({...f, [key]: val}));
+  const setArr = (key, idx, subKey, val) => {
+    const arr = [...form[key]];
+    arr[idx] = {...arr[idx], [subKey]: val};
+    set(key, arr);
+  };
+  const addItem = (key, template) => set(key, [...form[key], template]);
+  const removeItem = (key, idx) => set(key, form[key].filter((_,i)=>i!==idx));
+
+  const handlePhotoChange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setForm(f => ({...f, profilePhoto: file, profilePhotoPreview: url}));
+  };
+
+  const validateForm = () => {
+    if (!form.fullName.trim()) { toast.error('Full name is required'); return false; }
+    if (!form.email.trim()) { toast.error('Email is required'); return false; }
+    if (!form.phone.trim()) { toast.error('Phone number is required'); return false; }
+    return true;
+  };
+
+  const handleGenerate = async () => {
+    setGenerating(true);
+    try {
+      const res = await API.generateResume(form);
+      setResult(res);
+      setStep(4);
+      onGenerated?.(res);
+      toast.success('🎉 Resume generated successfully!');
+    } catch(e) {
+      toast.error(e.message || 'Generation failed');
+    }
+    setGenerating(false);
+  };
+
+  const steps = ['Fill Details', 'Verify OTP', 'Pay ₹50', 'Generate'];
+  const progress = (step / 4) * 100;
+
+  return (
+    <div className="resume-section">
+      {/* Stepper */}
+      <div className="stepper">
+        {steps.map((s, i) => (
+          <React.Fragment key={i}>
+            <div className="step">
+              <div className={`step-circle ${step > i+1 ? 'done' : step === i+1 ? 'active' : ''}`}>
+                {step > i+1 ? '✓' : i+1}
+              </div>
+              <span className={`step-label ${step === i+1 ? 'active' : ''}`}>{s}</span>
+            </div>
+            {i < steps.length-1 && <div className={`step-line ${step > i+1 ? 'done' : ''}`} />}
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* Progress */}
+      <div className="progress-bar-outer"><div className="progress-bar-inner" style={{width:`${progress}%`}} /></div>
+
+      {/* Step 1: Form */}
+      {step === 1 && (
+        <div className="main-grid">
+          <div>
+            <div className="card">
+              <div className="card-title"><span>✦</span> Build Your Premium Resume</div>
+
+              {/* Photo Upload */}
+              <div className="form-section">
+                <div className="section-header">Profile Photo</div>
+                <label className="photo-upload" style={{display:'block'}}>
+                  <input type="file" accept="image/*" style={{display:'none'}} onChange={handlePhotoChange} />
+                  {form.profilePhotoPreview
+                    ? <img src={form.profilePhotoPreview} className="photo-preview" alt="Profile" />
+                    : <div style={{fontSize:40,marginBottom:8}}>📸</div>}
+                  <div className="photo-upload-text">
+                    {form.profilePhotoPreview ? 'Click to change photo' : 'Upload Profile Photo'}
+                  </div>
+                  <div className="photo-upload-hint">JPEG, PNG or WebP • Max 5MB</div>
+                </label>
+              </div>
+
+              {/* Personal Info */}
+              <div className="form-section">
+                <div className="section-header">Personal Information</div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Full Name *</label>
+                    <input className="form-input" placeholder="Arjun Sharma" value={form.fullName}
+                      onChange={e => set('fullName', e.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Email Address *</label>
+                    <input className="form-input" type="email" placeholder="arjun@email.com" value={form.email}
+                      onChange={e => set('email', e.target.value)} />
+                  </div>
+                </div>
+                <div className="form-row" style={{marginTop:12}}>
+                  <div className="form-group">
+                    <label className="form-label">Phone Number *</label>
+                    <input className="form-input" placeholder="+91 9876543210" value={form.phone}
+                      onChange={e => set('phone', e.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Address</label>
+                    <input className="form-input" placeholder="Mumbai, Maharashtra" value={form.address}
+                      onChange={e => set('address', e.target.value)} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Career Objective */}
+              <div className="form-section">
+                <div className="section-header">Career Objective</div>
+                <div className="form-group">
+                  <textarea className="form-textarea" style={{minHeight:100}}
+                    placeholder="A motivated Computer Science student seeking an internship to apply my skills in web development and contribute to innovative projects..."
+                    value={form.careerObjective} onChange={e => set('careerObjective', e.target.value)} />
+                </div>
+              </div>
+
+              {/* Education */}
+              <div className="form-section">
+                <div className="section-header">Education & Qualifications</div>
+                {form.qualifications.map((q, i) => (
+                  <div key={i} className="array-item">
+                    <div className="array-item-header">
+                      <span className="array-item-title">Education #{i+1}</span>
+                      {form.qualifications.length > 1 && (
+                        <button className="btn-remove" onClick={() => removeItem('qualifications', i)}>Remove</button>
+                      )}
+                    </div>
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label className="form-label">Degree / Course *</label>
+                        <input className="form-input" placeholder="B.Tech Computer Science" value={q.degree}
+                          onChange={e => setArr('qualifications', i, 'degree', e.target.value)} />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Institution *</label>
+                        <input className="form-input" placeholder="IIT Bombay" value={q.institution}
+                          onChange={e => setArr('qualifications', i, 'institution', e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="form-row cols-3" style={{marginTop:10}}>
+                      <div className="form-group">
+                        <label className="form-label">Board / University</label>
+                        <input className="form-input" placeholder="Mumbai University" value={q.board}
+                          onChange={e => setArr('qualifications', i, 'board', e.target.value)} />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Year *</label>
+                        <input className="form-input" placeholder="2024" value={q.year}
+                          onChange={e => setArr('qualifications', i, 'year', e.target.value)} />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Percentage / CGPA</label>
+                        <input className="form-input" placeholder="85% / 8.5" value={q.percentage}
+                          onChange={e => setArr('qualifications', i, 'percentage', e.target.value)} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <button className="btn-add" onClick={() => addItem('qualifications', {degree:'',institution:'',board:'',year:'',percentage:''})}>
+                  + Add Education
+                </button>
+              </div>
+
+              {/* Technical Skills */}
+              <div className="form-section">
+                <div className="section-header">Technical Skills</div>
+                <SkillsInput value={form.technicalSkills} onChange={v => set('technicalSkills', v)} />
+              </div>
+
+              {/* Work Experience */}
+              <div className="form-section">
+                <div className="section-header">Internship / Work Experience</div>
+                {form.workExperience.map((w, i) => (
+                  <div key={i} className="array-item">
+                    <div className="array-item-header">
+                      <span className="array-item-title">Experience #{i+1}</span>
+                      <button className="btn-remove" onClick={() => removeItem('workExperience', i)}>Remove</button>
+                    </div>
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label className="form-label">Role / Position *</label>
+                        <input className="form-input" placeholder="Frontend Developer Intern" value={w.role}
+                          onChange={e => setArr('workExperience', i, 'role', e.target.value)} />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Company *</label>
+                        <input className="form-input" placeholder="TCS, Infosys, Startup..." value={w.company}
+                          onChange={e => setArr('workExperience', i, 'company', e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="form-row" style={{marginTop:10}}>
+                      <div className="form-group">
+                        <label className="form-label">Duration *</label>
+                        <input className="form-input" placeholder="Jun 2023 – Aug 2023" value={w.duration}
+                          onChange={e => setArr('workExperience', i, 'duration', e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="form-group" style={{marginTop:10}}>
+                      <label className="form-label">Description</label>
+                      <textarea className="form-textarea" style={{minHeight:70}}
+                        placeholder="Developed responsive UI components using React.js, improved performance by 30%..."
+                        value={w.description} onChange={e => setArr('workExperience', i, 'description', e.target.value)} />
+                    </div>
+                  </div>
+                ))}
+                <button className="btn-add" onClick={() => addItem('workExperience', {role:'',company:'',duration:'',description:''})}>
+                  + Add Experience
+                </button>
+              </div>
+
+              {/* Projects */}
+              <div className="form-section">
+                <div className="section-header">Projects</div>
+                {form.projects.map((p, i) => (
+                  <div key={i} className="array-item">
+                    <div className="array-item-header">
+                      <span className="array-item-title">Project #{i+1}</span>
+                      <button className="btn-remove" onClick={() => removeItem('projects', i)}>Remove</button>
+                    </div>
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label className="form-label">Project Name *</label>
+                        <input className="form-input" placeholder="E-commerce Platform" value={p.name}
+                          onChange={e => setArr('projects', i, 'name', e.target.value)} />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Technologies Used</label>
+                        <input className="form-input" placeholder="React, Node.js, MongoDB" value={p.technologies}
+                          onChange={e => setArr('projects', i, 'technologies', e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="form-group" style={{marginTop:10}}>
+                      <label className="form-label">Project Link</label>
+                      <input className="form-input" placeholder="https://github.com/username/project" value={p.link}
+                        onChange={e => setArr('projects', i, 'link', e.target.value)} />
+                    </div>
+                    <div className="form-group" style={{marginTop:10}}>
+                      <label className="form-label">Description</label>
+                      <textarea className="form-textarea" style={{minHeight:70}}
+                        placeholder="Built a full-stack e-commerce platform with real-time inventory management..."
+                        value={p.description} onChange={e => setArr('projects', i, 'description', e.target.value)} />
+                    </div>
+                  </div>
+                ))}
+                <button className="btn-add" onClick={() => addItem('projects', {name:'',technologies:'',link:'',description:''})}>
+                  + Add Project
+                </button>
+              </div>
+
+              {/* Certifications */}
+              <div className="form-section">
+                <div className="section-header">Certifications</div>
+                {form.certifications.map((c, i) => (
+                  <div key={i} className="array-item">
+                    <div className="array-item-header">
+                      <span className="array-item-title">Cert #{i+1}</span>
+                      <button className="btn-remove" onClick={() => removeItem('certifications', i)}>Remove</button>
+                    </div>
+                    <div className="form-row cols-3">
+                      <div className="form-group">
+                        <label className="form-label">Certificate Name *</label>
+                        <input className="form-input" placeholder="AWS Cloud Practitioner" value={c.name}
+                          onChange={e => setArr('certifications', i, 'name', e.target.value)} />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Issuer</label>
+                        <input className="form-input" placeholder="Amazon Web Services" value={c.issuer}
+                          onChange={e => setArr('certifications', i, 'issuer', e.target.value)} />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Year</label>
+                        <input className="form-input" placeholder="2023" value={c.year}
+                          onChange={e => setArr('certifications', i, 'year', e.target.value)} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <button className="btn-add" onClick={() => addItem('certifications', {name:'',issuer:'',year:''})}>
+                  + Add Certification
+                </button>
+              </div>
+
+              {/* Personal Details */}
+              <div className="form-section">
+                <div className="section-header">Personal Details</div>
+                <div className="form-row cols-3">
+                  <div className="form-group">
+                    <label className="form-label">Date of Birth</label>
+                    <input className="form-input" type="date" value={form.personalInfo.dob}
+                      onChange={e => set('personalInfo', {...form.personalInfo, dob: e.target.value})} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Gender</label>
+                    <select className="form-select" value={form.personalInfo.gender}
+                      onChange={e => set('personalInfo', {...form.personalInfo, gender: e.target.value})}>
+                      <option value="">Select</option>
+                      <option>Male</option><option>Female</option><option>Non-binary</option><option>Prefer not to say</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Nationality</label>
+                    <input className="form-input" placeholder="Indian" value={form.personalInfo.nationality}
+                      onChange={e => set('personalInfo', {...form.personalInfo, nationality: e.target.value})} />
+                  </div>
+                </div>
+                <div className="form-row" style={{marginTop:12}}>
+                  <div className="form-group">
+                    <label className="form-label">Languages Known</label>
+                    <input className="form-input" placeholder="English, Hindi, Marathi (comma separated)"
+                      value={form.personalInfo.languages?.join(', ')}
+                      onChange={e => set('personalInfo', {...form.personalInfo, languages: e.target.value.split(',').map(x=>x.trim()).filter(Boolean)})} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Hobbies & Interests</label>
+                    <input className="form-input" placeholder="Reading, Coding, Chess (comma separated)"
+                      value={form.personalInfo.hobbies?.join(', ')}
+                      onChange={e => set('personalInfo', {...form.personalInfo, hobbies: e.target.value.split(',').map(x=>x.trim()).filter(Boolean)})} />
+                  </div>
+                </div>
+              </div>
+
+              {/* CTA */}
+              <button className="btn btn-primary btn-lg" style={{width:'100%', marginTop:8}}
+                onClick={() => { if (validateForm()) setStep(2); }}>
+                Continue to OTP Verification →
+              </button>
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="sidebar-panel">
+            <LivePreview formData={form} />
+          </div>
+        </div>
+      )}
+
+      {/* Step 2: OTP */}
+      {step === 2 && (
+        <div style={{maxWidth:480, margin:'0 auto', display:'flex', flexDirection:'column', gap:16}}>
+          <OTPStep user={user} onVerified={() => setStep(3)} />
+          <button className="btn btn-ghost" onClick={() => setStep(1)}>← Back to Form</button>
+        </div>
+      )}
+
+      {/* Step 3: Payment */}
+      {step === 3 && (
+        <div style={{maxWidth:480, margin:'0 auto', display:'flex', flexDirection:'column', gap:16}}>
+          <PaymentStep user={user} onPaid={() => { setStep(4); handleGenerate(); }} />
+          <button className="btn btn-ghost" onClick={() => setStep(2)}>← Back to OTP</button>
+        </div>
+      )}
+
+      {/* Step 4: Done */}
+      {step === 4 && (
+        <div style={{maxWidth:560, margin:'0 auto'}}>
+          {generating ? (
+            <div className="success-panel">
+              <div className="success-icon">⚙️</div>
+              <div className="success-title">Generating Your Resume...</div>
+              <div className="success-subtitle">Our AI is building your ATS-optimized resume</div>
+              <div style={{marginTop:20,display:'flex',justifyContent:'center'}}>
+                <div className="spinner" style={{width:40,height:40,borderWidth:4}} />
+              </div>
+            </div>
+          ) : result ? (
+            <div className="success-panel">
+              <div className="success-icon">🎉</div>
+              <div className="success-title">Resume Generated!</div>
+              <div className="success-subtitle">Your premium ATS-friendly resume is ready</div>
+              <div className="tx-badge">Resume ID: {result.resumeId}</div>
+              <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
+                <button className="btn btn-emerald btn-lg" onClick={() => toast.info('PDF download available in full deployment')}>
+                  ⬇️ Download PDF
+                </button>
+                <button className="btn btn-ghost btn-lg" onClick={() => { setStep(1); setResult(null); }}>
+                  Create New Resume
+                </button>
+              </div>
+              <div style={{marginTop:20,fontSize:13,color:'var(--muted2)'}}>
+                ✅ Resume saved to your profile &nbsp;|&nbsp; 📧 Confirmation sent to {user?.email}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main App ─────────────────────────────────────────────────────────────────
+function App() {
+  const [user, setUser] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('user')); } catch { return null; }
+  });
+  const [showAuth, setShowAuth] = useState(false);
+  const [showResume, setShowResume] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    setShowResume(false);
+    toast.info('Logged out');
+  };
+
+  const handleStart = () => {
+    if (!user) { setShowAuth(true); return; }
+    setShowResume(true);
+    setTimeout(() => document.getElementById('resume-section')?.scrollIntoView({behavior:'smooth'}), 100);
+  };
+
+  return (
+    <div className="app">
+      <ToastContainer />
+      {showAuth && (
+        <AuthModal
+          onClose={() => setShowAuth(false)}
+          onSuccess={u => { setUser(u); setShowAuth(false); setShowResume(true); }}
+        />
+      )}
+
+      {/* Navbar */}
+      <nav className="navbar">
+        <a href="#" className="navbar-logo">
+          <div className="logo-icon">✦</div>
+          <span className="logo-text">ResumeForge</span>
+        </a>
+        <div className="navbar-actions">
+          {user ? (
+            <>
+              <span style={{fontSize:13,color:'var(--muted2)'}}>
+                {user.isPremium && <span style={{color:'var(--amber)',marginRight:6}}>⭐</span>}
+                {user.fullName}
+              </span>
+              <button className="btn btn-ghost" onClick={handleLogout}>Logout</button>
+              <button className="btn btn-primary" onClick={handleStart}>Create Resume</button>
+            </>
+          ) : (
+            <>
+              <button className="btn btn-ghost" onClick={() => setShowAuth(true)}>Sign In</button>
+              <button className="btn btn-primary" onClick={() => setShowAuth(true)}>Get Started</button>
+            </>
+          )}
+        </div>
+      </nav>
+
+      {/* Hero */}
+      {!showResume && (
+        <>
+          <div className="hero">
+            <div className="hero-badge">✦ Premium Feature</div>
+            <h1 className="hero-title">
+              Build a Resume<br />
+              <span className="gradient-text">That Gets You Hired</span>
+            </h1>
+            <p className="hero-desc">
+              Create a professional, ATS-optimized resume in minutes. Live preview,
+              PDF download, and automatic profile attachment — all for just ₹50.
+            </p>
+            <div className="hero-actions">
+              <button className="btn btn-primary btn-lg" onClick={handleStart}>
+                ✦ Create Premium Resume
+              </button>
+              <div className="price-badge">₹50 one-time</div>
+            </div>
+          </div>
+
+          {/* Features */}
+          <div className="features">
+            {[
+              { icon: '⚡', title: 'Live Preview', desc: 'See your resume update in real-time as you type each field' },
+              { icon: '🤖', title: 'ATS-Optimized', desc: 'Passes Applicant Tracking Systems used by top companies' },
+              { icon: '📄', title: 'PDF Download', desc: 'Download your professional resume as a pixel-perfect PDF' },
+              { icon: '🔐', title: 'OTP Verified', desc: 'Secure email OTP verification before payment' },
+              { icon: '💳', title: 'Razorpay Secure', desc: 'Safe ₹50 payment via UPI, cards, net banking' },
+              { icon: '👤', title: 'Profile Linked', desc: 'Resume auto-attached to your student profile' },
+            ].map(f => (
+              <div key={f.title} className="feature-card">
+                <div className="feature-icon">{f.icon}</div>
+                <div className="feature-title">{f.title}</div>
+                <div className="feature-desc">{f.desc}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Resume Section */}
+      {showResume && user && (
+        <div id="resume-section">
+          <ResumeForm user={user} onGenerated={() => {}} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
